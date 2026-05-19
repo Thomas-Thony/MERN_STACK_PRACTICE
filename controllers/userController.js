@@ -79,7 +79,29 @@ const updateUser = asyncHandler(async (req, res) => {
 // @route DELETE /users
 // @access Private
 const deleteUser = asyncHandler(async (req, res) => {
+    const { id } = req.body;
 
+    if (!id) {
+        return res.status(400).json({ message: "Veuillez indiquer un identifiant utilisateur !" });
+    }
+
+    const notes = await Note.findOne({ user: id }).lean().exec();
+
+    if (notes?.length) {
+        return res.status(409).json({ message: "Cet utilisateur possède des notes !" });
+    }
+
+    const user = await Utilisateur.findById(id).exec();
+
+    if (!user) {
+        return res.status(409).json({ message: "Aucun utilisateur trouvé pour cet identifiant !" });
+    }
+
+    const result = await user.deleteOne();
+
+    const reply = `L'utilisateur ${result.username} avec l'identifiant ${result._id} a été supprimé avec succès !`;
+
+    return res.json(reply);
 });
 
 module.exports = {
