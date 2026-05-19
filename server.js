@@ -6,6 +6,8 @@ const cookieParser = require("cookie-parser")
 const errorHandler = require("./core/errorHandler.js")
 const cors = require("cors")
 const corsOptions = require("./core/config/corsOptions.js")
+const connectDB = require("./core/config/database/connexion.js")
+const mongoose = require("mongoose")
 
 require("dotenv").config()
 
