@@ -50,6 +50,29 @@ const updateUser = asyncHandler(async (req, res) => {
     if (!id || !username || !Array.isArray(roles) || roles.length || typeof(active) !== 'boolean') {
         return res.status(400).json({ message: "Tous les champs sont requis !" });
     }
+
+    const user = await Utilisateur.findById(id).exec();
+
+    if (!user) {
+        return res.status(400).json({message: "Utilisateur non trouvé !"});
+    }
+
+    const duplicate = await Utilisateur.findOne({ username }).lean().exec();
+
+    if (duplcate && duplicate?._id.toString() !== id) {
+        return res.status(409).json({ message: "Nom d'utilisateur en doublon !" });
+    }
+
+    user.username = username;
+    user.roles = roles;
+    user.active = active;
+
+    if (password) {
+        user.password = await bcrypt.hash(password, 10);
+    }
+
+    const updateUser = await user.save();
+    res.json({ message: `${updateUser.username} mise à jour !`})
 });
 
 // @desc Supprime un utilisateur
